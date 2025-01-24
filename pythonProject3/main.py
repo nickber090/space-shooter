@@ -3,7 +3,7 @@ import sys
 
 
 def main_menu():
-    fon = pygame.transform.scale(pygame.image.load('intro_fon.jpg'), size)
+    fon = pygame.transform.scale(pygame.image.load('data/intro_fon.jpg'), size)
     font = pygame.font.Font(None, 35)
     screen.blit(fon, (0, 0))
     games_title = font.render("Space-shooter", 1, pygame.Color('white'))
@@ -38,7 +38,7 @@ pygame.display.set_caption("Cosmos Background")
 
 # Загрузим изображение
 try:
-    background = pygame.image.load('cosmos.png')
+    background = pygame.image.load('data/cosmos.png')
 except pygame.error:
     print("Не удалось загрузить изображение. Проверьте наличие файла cosmos.png.")
     pygame.quit()
