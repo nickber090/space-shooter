@@ -5,6 +5,21 @@ import random
 import time
 
 
+# Инициализация Pygame
+pygame.init()
+
+# Установим размеры окна
+size = width, height = 900, 400
+screen = pygame.display.set_mode(size)
+clock = pygame.time.Clock()
+background = pygame.image.load('data/cosmos.png').convert()
+
+# Зададим заголовок окна
+pygame.display.set_caption("Space-shooter")
+
+all_sprites = pygame.sprite.Group()
+
+
 def main_menu():
     fon = pygame.transform.scale(pygame.image.load('data/intro_fon.jpg'), size)
     font = pygame.font.Font(None, 35)
@@ -26,7 +41,7 @@ def main_menu():
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
-                return
+                main_cycle()
         pygame.display.flip()
 
 
@@ -51,7 +66,7 @@ def death_screen():
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN and continue_btn_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
-                return
+                main_cycle()
             if event.type == pygame.MOUSEBUTTONDOWN and main_menu_btn_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
                 main_menu()
             pygame.display.flip()
@@ -92,24 +107,32 @@ def load_image(name, colorkey=None):
         image.set_colorkey(colorkey)
     return image
 
-# Инициализация Pygame
-pygame.init()
 
-# Установим размеры окна
-size = width, height = 900, 400
-screen = pygame.display.set_mode(size)
+def main_cycle():
+    running = True
+    last_meteor_time = time.time()
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                sys.exit()
+        current_time = time.time()
+        if current_time - last_meteor_time >= meteor_creation_interval:
+            num_meteors = random.randint(1, 2)
+            for _ in range(num_meteors):
+                Meteorites(all_sprites)  # Создаем новые метеориты
+            last_meteor_time = current_time
 
-# Зададим заголовок окна
-pygame.display.set_caption("Cosmos Background")
+        # Отображаем фон
+        screen.blit(background, (0, 0))
 
-# Загрузим изображение
-try:
-    background = pygame.image.load('data/cosmos.png').convert()
+        # Обновляем и рисуем спрайты
+        all_sprites.update()
+        all_sprites.draw(screen)
 
-except pygame.error:
-    print("Не удалось загрузить изображение. Проверьте наличие файла cosmos.png.")
-    pygame.quit()
-    sys.exit()
+        # Обновляем экран
+        pygame.display.flip()
+        clock.tick(70)
 
 
 class Meteorites(pygame.sprite.Sprite):
@@ -134,7 +157,7 @@ class Meteorites(pygame.sprite.Sprite):
             self.reset_pos()
 
 
-last_meteor_time = time.time()
+meteor = Meteorites(all_sprites)
 meteor_creation_interval = 9
 
 
@@ -169,41 +192,8 @@ class Spaceship(pygame.sprite.Sprite):
         self.rect.bottom = min(height, self.rect.bottom)
 
 
-# Основной игровой цикл
-clock = pygame.time.Clock()
-
-all_sprites = pygame.sprite.Group()
-
-meteor = Meteorites(all_sprites)
-
 spaceship = Spaceship(all_sprites)
 
 
-# Основной игровой цикл
-main_menu()
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-            sys.exit()
-    current_time = time.time()
-    if current_time - last_meteor_time >= meteor_creation_interval:
-        num_meteors = random.randint(1, 2)
-        for _ in range(num_meteors):
-            Meteorites(all_sprites)  # Создаем новые метеориты
-        last_meteor_time = current_time
-
-    # Отображаем фон
-    screen.blit(background, (0, 0))
-
-    # Обновляем и рисуем спрайты
-    all_sprites.update()
-    all_sprites.draw(screen)
-
-    # Обновляем экран
-    pygame.display.flip()
-    clock.tick(70)
-
-# Завершение Pygame
-pygame.quit()
+if __name__ == '__main__':
+    main_menu()
