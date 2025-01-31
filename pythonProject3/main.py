@@ -131,7 +131,7 @@ meteor = Meteorites(all_sprites)
 
 spaceship = Spaceship(all_sprites)
 
-main_menu()
+
 # Основной игровой цикл
 main_menu()
 running = True
