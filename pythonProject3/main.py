@@ -30,6 +30,53 @@ def main_menu():
         pygame.display.flip()
 
 
+def death_screen():
+    fon = pygame.transform.scale(pygame.image.load('data/death_screen.PNG'), size)
+    font = pygame.font.Font(None, 35)
+    screen.blit(fon, (0, 0))
+    main_menu_button = font.render('Главное меню', 1, pygame.Color('white'))
+    main_menu_btn_rect = main_menu_button.get_rect()
+    main_menu_btn_rect.x = width // 2 - main_menu_btn_rect.width // 2
+    main_menu_btn_rect.top = height // 100 * 80
+    screen.blit(main_menu_button, main_menu_btn_rect)
+    continue_button = font.render('Продолжить', 1, pygame.Color('white'))
+    continue_btn_rect = continue_button.get_rect()
+    continue_btn_rect.x = width // 2 - continue_btn_rect.width // 2
+    continue_btn_rect.top = height // 100 * 65
+    screen.blit(continue_button, continue_btn_rect)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN and continue_btn_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
+                return
+            if event.type == pygame.MOUSEBUTTONDOWN and main_menu_btn_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
+                main_menu()
+            pygame.display.flip()
+
+
+def victory_screen():
+    fon = pygame.transform.scale(pygame.image.load('data/victory_screen.PNG'), size)
+    font = pygame.font.Font(None, 35)
+    screen.blit(fon, (0, 0))
+    main_menu_button = font.render('Главное меню', 1, pygame.Color('white'))
+    main_menu_btn_rect = main_menu_button.get_rect()
+    main_menu_btn_rect.x = width // 2 - main_menu_btn_rect.width // 2 - 10
+    main_menu_btn_rect.top = height // 100 * 65
+    screen.blit(main_menu_button, main_menu_btn_rect)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN and main_menu_btn_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
+                main_menu()
+            pygame.display.flip()
+
+
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
     try:
