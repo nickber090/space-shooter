@@ -18,6 +18,7 @@ background = pygame.image.load('data/cosmos.png').convert()
 pygame.display.set_caption("Space-shooter")
 
 all_sprites = pygame.sprite.Group()
+all_meteorites = pygame.sprite.Group()
 
 
 def main_menu():
@@ -109,6 +110,7 @@ def load_image(name, colorkey=None):
 
 
 def main_cycle():
+    restart_game()
     running = True
     last_meteor_time = time.time()
     while running:
@@ -120,7 +122,8 @@ def main_cycle():
         if current_time - last_meteor_time >= meteor_creation_interval:
             num_meteors = random.randint(1, 2)
             for _ in range(num_meteors):
-                Meteorites(all_sprites)  # Создаем новые метеориты
+                m = Meteorites(all_sprites)  # Создаем новые метеориты
+                all_meteorites.add(m)
             last_meteor_time = current_time
 
         # Отображаем фон
@@ -133,6 +136,14 @@ def main_cycle():
         # Обновляем экран
         pygame.display.flip()
         clock.tick(70)
+
+
+def restart_game():
+    all_sprites.empty()
+    all_meteorites.empty()
+    spaceship = Spaceship(all_sprites)
+    meteor = Meteorites(all_sprites)
+    all_meteorites.add(meteor)
 
 
 class Meteorites(pygame.sprite.Sprite):
@@ -157,12 +168,12 @@ class Meteorites(pygame.sprite.Sprite):
             self.reset_pos()
 
 
-meteor = Meteorites(all_sprites)
 meteor_creation_interval = 9
 
 
 class Spaceship(pygame.sprite.Sprite):
     spaceship_image = load_image('spaceship.png', colorkey=(255, 255, 255))
+    health_point = 100
 
     def __init__(self, group):
         super().__init__(group)
@@ -173,8 +184,11 @@ class Spaceship(pygame.sprite.Sprite):
         self.rect.centerx = width // 2
         self.rect.bottom = height - 10
         self.speed = 3
+        self.health_point = Spaceship.health_point
 
     def update(self):
+        if self.health_point <= 0:
+            death_screen()
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             self.rect.x -= self.speed
@@ -191,8 +205,8 @@ class Spaceship(pygame.sprite.Sprite):
         self.rect.top = max(0, self.rect.top)
         self.rect.bottom = min(height, self.rect.bottom)
 
-
-spaceship = Spaceship(all_sprites)
+        if pygame.sprite.spritecollideany(self, all_meteorites):
+            self.health_point -= 50
 
 
 if __name__ == '__main__':
