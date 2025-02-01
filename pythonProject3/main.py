@@ -70,7 +70,7 @@ def death_screen():
                 main_cycle()
             if event.type == pygame.MOUSEBUTTONDOWN and main_menu_btn_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
                 main_menu()
-            pygame.display.flip()
+        pygame.display.flip()
 
 
 def victory_screen():
@@ -205,7 +205,7 @@ class Spaceship(pygame.sprite.Sprite):
         self.rect.top = max(0, self.rect.top)
         self.rect.bottom = min(height, self.rect.bottom)
 
-        if pygame.sprite.spritecollideany(self, all_meteorites):
+        if pygame.sprite.spritecollide(self, all_meteorites, True):
             self.health_point -= 50
 
 
