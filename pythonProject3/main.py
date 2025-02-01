@@ -209,5 +209,16 @@ class Spaceship(pygame.sprite.Sprite):
             self.health_point -= 50
 
 
+class HealthPoints(pygame.sprite.Sprite):
+    full_hp_image = None
+    half_hp_image = None
+    zero_hp_image = None
+
+    def __init__(self, group):
+        super.__init__(group)
+        self.image = HealthPoints.full_hp_image
+
+
+
 if __name__ == '__main__':
     main_menu()
