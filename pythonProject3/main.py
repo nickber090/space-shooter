@@ -115,7 +115,7 @@ def first_level():
     hp = HealthPoints(all_sprites)
     running = True
     last_meteor_time = time.time()
-    game_time = 60
+    game_time = 50
     pygame.time.set_timer(pygame.USEREVENT, 1000)
     font = pygame.font.SysFont('arial', 40)
 
