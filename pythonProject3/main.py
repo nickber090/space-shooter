@@ -22,27 +22,59 @@ all_meteorites = pygame.sprite.Group()
 
 
 def main_menu():
+    second_lvl = False
+    third_lvl = False
+    with open('levels') as f:
+        data = f.read()
+        if data[0] == '1':
+            second_lvl = True
+        if data[1] == '1':
+            third_lvl = True
+
     fon = pygame.transform.scale(pygame.image.load('data/intro_fon.jpg'), size)
     font = pygame.font.Font(None, 35)
     screen.blit(fon, (0, 0))
+
     games_title = font.render("Space-shooter", 1, pygame.Color('white'))
-    str_rect = games_title.get_rect()
-    str_rect.x = width // 2 - str_rect.width // 2
-    str_rect.top = 20
-    screen.blit(games_title, str_rect)
-    instruction = font.render("Чтобы начать игру, нажмите любую кнопку.", 1, pygame.Color('white'))
-    str_rect = instruction.get_rect()
-    str_rect.x = 175
-    str_rect.top = 175
-    screen.blit(instruction, str_rect)
+    title_rect = games_title.get_rect()
+    title_rect.x = width // 2 - title_rect.width // 2
+    title_rect.top = 20
+    screen.blit(games_title, title_rect)
+
+    f_lvl = font.render('Уровень 1', 1, pygame.Color('white'))
+    f_lvl_rect = f_lvl.get_rect()
+    f_lvl_rect.x = width // 3 - f_lvl.get_width()
+    f_lvl_rect.top = height // 2 - f_lvl.get_height() // 2
+    screen.blit(f_lvl, f_lvl_rect)
+
+    if second_lvl:
+        s_lvl = font.render('Уровень 2', 1, pygame.Color('white'))
+        s_lvl_rect = s_lvl.get_rect()
+        s_lvl_rect.x = width // 2 - s_lvl.get_width() // 2
+        s_lvl_rect.top = height // 2 - s_lvl.get_height() // 2
+        screen.blit(s_lvl, s_lvl_rect)
+
+    if third_lvl:
+        th_lvl = font.render('Уровень 3', 1, pygame.Color('white'))
+        th_lvl_rect = th_lvl.get_rect()
+        th_lvl_rect.x = 2 * width // 3
+        th_lvl_rect.top = height // 2 - th_lvl.get_height() // 2
+        screen.blit(th_lvl, th_lvl_rect)
+
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN and f_lvl_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
                 first_level()
+            if (second_lvl and event.type == pygame.MOUSEBUTTONDOWN
+                    and s_lvl_rect.colliderect(pygame.Rect(*event.pos, 10, 10))):
+                pass
+            if (third_lvl and event.type == pygame.MOUSEBUTTONDOWN
+                    and th_lvl_rect.colliderect(pygame.Rect(*event.pos, 10, 10))):
+                pass
         pygame.display.flip()
 
 
@@ -140,6 +172,7 @@ def first_level():
         screen.blit(background, (0, 0))
         text = font.render(str(game_time), True, pygame.Color('red'))
         screen.blit(text, (width // 2 - text.get_width() // 2, text.get_height() // 2))
+        # проверка на то, закончилось ли время. если да, то в файл с уровнями записывается 1 вместо первого 0
         if game_time == 0:
             with open('levels') as f:
                 data = list(f.read())
@@ -147,6 +180,7 @@ def first_level():
             with open('levels', 'w') as f:
                 f.write(''.join(data))
             victory_screen()
+
         # Обновляем и рисуем спрайты
         all_sprites.update()
         all_sprites.draw(screen)
