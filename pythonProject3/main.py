@@ -90,7 +90,7 @@ def victory_screen():
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN and main_menu_btn_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
                 main_menu()
-            pygame.display.flip()
+        pygame.display.flip()
 
 
 def load_image(name, colorkey=None):
@@ -111,6 +111,8 @@ def load_image(name, colorkey=None):
 
 def main_cycle():
     restart_game()
+    spaceship = Spaceship(all_sprites)
+    hp = HealthPoints(all_sprites)
     running = True
     last_meteor_time = time.time()
     while running:
@@ -125,6 +127,8 @@ def main_cycle():
                 m = Meteorites(all_sprites)  # Создаем новые метеориты
                 all_meteorites.add(m)
             last_meteor_time = current_time
+        if spaceship.health_point <= 50:
+            hp.image = HealthPoints.half_hp_image
 
         # Отображаем фон
         screen.blit(background, (0, 0))
@@ -141,7 +145,6 @@ def main_cycle():
 def restart_game():
     all_sprites.empty()
     all_meteorites.empty()
-    spaceship = Spaceship(all_sprites)
     meteor = Meteorites(all_sprites)
     all_meteorites.add(meteor)
 
@@ -210,14 +213,17 @@ class Spaceship(pygame.sprite.Sprite):
 
 
 class HealthPoints(pygame.sprite.Sprite):
-    full_hp_image = None
-    half_hp_image = None
-    zero_hp_image = None
+    full_hp_image = load_image('full_hp.png', -1)
+    full_hp_image = pygame.transform.scale(full_hp_image, (50, 50))
+    half_hp_image = load_image('half_hp.png', -1)
+    half_hp_image = pygame.transform.scale(half_hp_image, (50, 50))
 
     def __init__(self, group):
-        super.__init__(group)
+        super().__init__(group)
         self.image = HealthPoints.full_hp_image
-
+        self.rect = self.image.get_rect()
+        self.rect.x = self.image.get_width() // 4
+        self.rect.y = self.image.get_height() // 4
 
 
 if __name__ == '__main__':
