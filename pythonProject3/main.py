@@ -115,11 +115,17 @@ def first_level():
     hp = HealthPoints(all_sprites)
     running = True
     last_meteor_time = time.time()
+    game_time = 60
+    pygame.time.set_timer(pygame.USEREVENT, 1000)
+    font = pygame.font.SysFont('arial', 40)
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
                 sys.exit()
+            if event.type == pygame.USEREVENT:
+                game_time -= 1
         current_time = time.time()
         if current_time - last_meteor_time >= meteor_creation_interval:
             num_meteors = random.randint(1, 2)
@@ -132,7 +138,10 @@ def first_level():
 
         # Отображаем фон
         screen.blit(background, (0, 0))
-
+        text = font.render(str(game_time), True, pygame.Color('red'))
+        screen.blit(text, (width // 2 - text.get_width() // 2, text.get_height() // 2))
+        if game_time == 0:
+            victory_screen()
         # Обновляем и рисуем спрайты
         all_sprites.update()
         all_sprites.draw(screen)
