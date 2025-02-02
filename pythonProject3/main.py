@@ -141,6 +141,11 @@ def first_level():
         text = font.render(str(game_time), True, pygame.Color('red'))
         screen.blit(text, (width // 2 - text.get_width() // 2, text.get_height() // 2))
         if game_time == 0:
+            with open('levels') as f:
+                data = list(f.read())
+                data[0] = '1'
+            with open('levels', 'w') as f:
+                f.write(''.join(data))
             victory_screen()
         # Обновляем и рисуем спрайты
         all_sprites.update()
