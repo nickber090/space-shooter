@@ -42,7 +42,7 @@ def main_menu():
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
-                main_cycle()
+                first_level()
         pygame.display.flip()
 
 
@@ -67,7 +67,7 @@ def death_screen():
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN and continue_btn_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
-                main_cycle()
+                first_level()
             if event.type == pygame.MOUSEBUTTONDOWN and main_menu_btn_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
                 main_menu()
         pygame.display.flip()
@@ -109,7 +109,7 @@ def load_image(name, colorkey=None):
     return image
 
 
-def main_cycle():
+def first_level():
     restart_game()
     spaceship = Spaceship(all_sprites)
     hp = HealthPoints(all_sprites)
