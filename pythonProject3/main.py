@@ -159,6 +159,8 @@ def first_level():
                 sys.exit()
             if event.type == pygame.USEREVENT:
                 game_time -= 1
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                main_menu()
         current_time = time.time()
         if current_time - last_meteor_time >= meteor_creation_interval:
             num_meteors = random.randint(1, 2)
@@ -173,7 +175,8 @@ def first_level():
         screen.blit(background, (0, 0))
         text = font.render(str(game_time), True, pygame.Color('red'))
         screen.blit(text, (width // 2 - text.get_width() // 2, text.get_height() // 2))
-        # проверка на то, закончилось ли время. если да, то в файл с уровнями записывается 1 вместо первого 0
+        # проверка на то, закончилось ли время. если да, то уровень пройден,
+        # и в файл с уровнями записывается 1 вместо первого 0 для открытия 2-ого уровня
         if game_time == 0:
             with open('levels') as f:
                 data = list(f.read())
