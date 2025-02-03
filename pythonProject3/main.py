@@ -4,6 +4,7 @@ import os
 import random
 import time
 
+from pygame.examples.cursors import image
 
 # Инициализация Pygame
 pygame.init()
@@ -198,7 +199,8 @@ def restart_game():
 
 
 class Meteorites(pygame.sprite.Sprite):
-    image = load_image("meteor.png", -1)  # Указываем colorkey
+    image = load_image("meteor.png", -1) # Указываем colorkey
+    image = pygame.transform.scale(image, (65, 65))
 
     def __init__(self, group):
         super().__init__(group)
@@ -224,11 +226,14 @@ meteor_creation_interval = 9
 
 class Spaceship(pygame.sprite.Sprite):
     spaceship_image = load_image('spaceship.png', colorkey=(255, 255, 255))
+    image_boom = load_image("boom.png")
     health_point = 100
 
     def __init__(self, group):
         super().__init__(group)
         self.image = Spaceship.spaceship_image
+        self.imageb = Spaceship.image_boom
+        self.imageb = pygame.transform.scale(Spaceship.image_boom, (120, 120))
         self.image = pygame.transform.scale(Spaceship.spaceship_image, (80, 80))
         self.rect = self.image.get_rect()
         self.rect = self.image.get_rect()
@@ -236,10 +241,20 @@ class Spaceship(pygame.sprite.Sprite):
         self.rect.bottom = height - 10
         self.speed = 3
         self.health_point = Spaceship.health_point
+        self.dead = False
+        self.boom_time = 0
 
-    def update(self):
-        if self.health_point <= 0:
+    def update(self, *args):
+        if self.health_point <= 0 and not self.dead:
+            self.image = self.imageb
+            self.dead = True
+            self.boom_time = pygame.time.get_ticks()
+            self.speed = 0
+
+        if self.dead and pygame.time.get_ticks() - self.boom_time > 600:
+            time.sleep(0.5)
             death_screen()
+
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             self.rect.x -= self.speed
