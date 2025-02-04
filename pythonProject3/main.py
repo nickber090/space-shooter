@@ -72,7 +72,7 @@ def main_menu():
                 first_level()
             if (second_lvl and event.type == pygame.MOUSEBUTTONDOWN
                     and s_lvl_rect.colliderect(pygame.Rect(*event.pos, 10, 10))):
-                pass
+                seconds_level()
             if (third_lvl and event.type == pygame.MOUSEBUTTONDOWN
                     and th_lvl_rect.colliderect(pygame.Rect(*event.pos, 10, 10))):
                 pass
@@ -194,6 +194,52 @@ def first_level():
         clock.tick(70)
 
 
+def seconds_level():
+    restart_game_s_level()
+    spaceship = Spaceship(all_sprites)
+    hp = HealthPoints(all_sprites)
+    running = True
+    game_time = 50
+    pygame.time.set_timer(pygame.USEREVENT, 1000)
+    font = pygame.font.SysFont('arial', 40)
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                sys.exit()
+            if event.type == pygame.USEREVENT:
+                game_time -= 1
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                main_menu()
+        if spaceship.health_point <= 50:
+            hp.image = HealthPoints.half_hp_image
+
+        # Отображаем фон
+        screen.blit(background, (0, 0))
+        text = font.render(str(game_time), True, pygame.Color('red'))
+        screen.blit(text, (width // 2 - text.get_width() // 2, text.get_height() // 2))
+        # проверка на то, закончилось ли время. если да, то уровень пройден,
+        # и в файл с уровнями записывается 1 вместо первого 0 для открытия 2-ого уровня
+        if game_time == 0:
+            with open('levels') as f:
+                data = list(f.read())
+                data[1] = '1'
+            with open('levels', 'w') as f:
+                f.write(''.join(data))
+            victory_screen()
+
+        all_sprites.update()
+        all_sprites.draw(screen)
+
+        pygame.display.flip()
+        clock.tick(70)
+
+def restart_game_s_level():
+    all_sprites.empty()
+
+
+
 def restart_game():
     all_sprites.empty()
     all_meteorites.empty()
@@ -203,7 +249,6 @@ def restart_game():
 
 class Meteorites(pygame.sprite.Sprite):
     image = load_image("meteor.png", -1) # Указываем colorkey
-    image = pygame.transform.scale(image, (65, 65))
 
     def __init__(self, group):
         super().__init__(group)
@@ -216,7 +261,7 @@ class Meteorites(pygame.sprite.Sprite):
 
     def reset_pos(self):
         self.rect.y = random.randint(0, height - self.rect.height)
-        self.rect.x = width + random.randint(0, width // 2)
+        self.rect.x = width + random.randint(0, 65)
 
     def update(self):
         self.rect.x -= self.speed  # Движение справа на лево
