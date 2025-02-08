@@ -435,7 +435,7 @@ class Bullets(pygame.sprite.Sprite):
     def __init__(self, group, owner, owners_x, owners_y):
         super().__init__(group)
         self.owner = owner
-        self.speed = 3
+        self.speed = 4
         self.image = None
         if isinstance(owner, Spaceship):
             self.image = Bullets.players_bullet_image
