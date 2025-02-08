@@ -21,6 +21,8 @@ current_lvl = None
 
 all_sprites = pygame.sprite.Group()
 all_meteorites = pygame.sprite.Group()
+all_opponents = pygame.sprite.Group()
+spaceships = pygame.sprite.Group()
 
 
 def main_menu():
@@ -146,7 +148,7 @@ def load_image(name, colorkey=None):
 
 
 def first_level():
-    restart_game()
+    restart_game_f_level()
     spaceship = Spaceship(all_sprites)
     hp = HealthPoints(all_sprites)
     running = True
@@ -171,7 +173,7 @@ def first_level():
                 m = Meteorites(all_sprites)  # Создаем новые метеориты
                 all_meteorites.add(m)
             last_meteor_time = current_time
-        if spaceship.health_point <= 50:
+        if spaceship.hp <= 50:
             hp.image = HealthPoints.half_hp_image
 
         # Отображаем фон
@@ -201,6 +203,7 @@ def first_level():
 class Opponent(pygame.sprite.Sprite):
     def __init__(self, group):
         super().__init__(group)
+        self.hp = 3
         self.image = load_image("opponent.png", colorkey=(255, 255, 255))
         self.image = pygame.transform.rotate(self.image, 90)
         self.image = pygame.transform.scale(self.image, (60, 60))
@@ -210,6 +213,7 @@ class Opponent(pygame.sprite.Sprite):
         self.bullet_interval = 1.75
         self.current_time = time.time()
         self.last_bullet_time = time.time()
+        all_opponents.add(self)
 
     def reset_pos(self):
         self.rect.y = random.randint(0, height - self.rect.height)
@@ -223,6 +227,8 @@ class Opponent(pygame.sprite.Sprite):
         if self.current_time - self.last_bullet_time >= self.bullet_interval:
             bullet = Bullets(all_sprites, self, self.rect.x, self.rect.y)
             self.last_bullet_time = time.time()
+        if self.hp <= 0:
+            self.kill()
 
 
 opponent_interval = 9
@@ -231,15 +237,16 @@ opponent_interval = 9
 def second_level():
     restart_game_s_level()
     spaceship = Spaceship(all_sprites)
+    spaceships.add(spaceship)
     hp = HealthPoints(all_sprites)
     running = True
-    game_time = 50
+    game_time = 60
     pygame.time.set_timer(pygame.USEREVENT, 1000)
     font = pygame.font.SysFont('arial', 40)
     opponent = Opponent(all_sprites)
     last_opponent_time = time.time()
     last_bullet_time = 0
-    bullet_interval = 1.75
+    bullet_interval = 0.65
 
     while running:
         for event in pygame.event.get():
@@ -255,7 +262,7 @@ def second_level():
                 if bullet_time - last_bullet_time >= bullet_interval:
                     bullet = Bullets(all_sprites, spaceship, spaceship.rect.x, spaceship.rect.y + 25)
                     last_bullet_time = bullet_time
-        if spaceship.health_point <= 50:
+        if spaceship.hp <= 50:
             hp.image = HealthPoints.half_hp_image
 
         # Отображаем фон
@@ -290,13 +297,15 @@ def second_level():
 
 def restart_game_s_level():
     all_sprites.empty()
+    all_opponents.empty()
 
 
-def restart_game():
+def restart_game_f_level():
     all_sprites.empty()
     all_meteorites.empty()
     meteor = Meteorites(all_sprites)
     all_meteorites.add(meteor)
+    spaceships.empty()
 
 
 class Meteorites(pygame.sprite.Sprite):
@@ -328,7 +337,7 @@ meteor_creation_interval = 9
 class Spaceship(pygame.sprite.Sprite):
     spaceship_image = load_image('spaceship.png', colorkey=(255, 255, 255))
     image_boom = load_image("boom.png")
-    health_point = 100
+    hp = 100
 
     def __init__(self, group):
         super().__init__(group)
@@ -341,12 +350,12 @@ class Spaceship(pygame.sprite.Sprite):
         self.rect.centerx = width // 2
         self.rect.bottom = height - 10
         self.speed = 3
-        self.health_point = Spaceship.health_point
+        self.hp = Spaceship.hp
         self.dead = False
         self.boom_time = 0
 
     def update(self, *args):
-        if self.health_point <= 0 and not self.dead:
+        if self.hp <= 0 and not self.dead:
             self.image = self.imageb
             self.dead = True
             self.boom_time = pygame.time.get_ticks()
@@ -373,7 +382,7 @@ class Spaceship(pygame.sprite.Sprite):
         self.rect.bottom = min(height, self.rect.bottom)
 
         if pygame.sprite.spritecollide(self, all_meteorites, True):
-            self.health_point -= 50
+            self.hp -= 50
 
 
 class HealthPoints(pygame.sprite.Sprite):
@@ -415,8 +424,19 @@ class Bullets(pygame.sprite.Sprite):
     def update(self):
         if self.bullet_owners_class == Spaceship:
             self.rect.x += self.speed
+            if pygame.sprite.spritecollideany(self, all_opponents):
+                enemy = pygame.sprite.spritecollideany(self, all_opponents)
+                if pygame.sprite.collide_rect_ratio(0.62)(self, enemy):
+                    enemy.hp -= 1
+                    self.kill()
+
         if self.bullet_owners_class == Opponent:
             self.rect.x -= self.speed
+            if pygame.sprite.spritecollideany(self, spaceships):
+                ship = pygame.sprite.spritecollideany(self, spaceships)
+                if pygame.sprite.collide_rect_ratio(0.62)(self, ship):
+                    ship.hp -= 10
+                    self.kill()
 
         if self.rect.x > width or self.rect.x < 0:
             self.kill()
