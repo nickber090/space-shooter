@@ -238,6 +238,8 @@ def second_level():
     font = pygame.font.SysFont('arial', 40)
     opponent = Opponent(all_sprites)
     last_opponent_time = time.time()
+    last_bullet_time = 0
+    bullet_interval = 1.75
 
     while running:
         for event in pygame.event.get():
@@ -248,6 +250,11 @@ def second_level():
                 game_time -= 1
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 main_menu()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                bullet_time = time.time()
+                if bullet_time - last_bullet_time >= bullet_interval:
+                    bullet = Bullets(all_sprites, spaceship, spaceship.rect.x, spaceship.rect.y + 25)
+                    last_bullet_time = bullet_time
         if spaceship.health_point <= 50:
             hp.image = HealthPoints.half_hp_image
 
@@ -387,7 +394,7 @@ class Bullets(pygame.sprite.Sprite):
     opponent_bullet_image = load_image('opponents_bullet.png')
     opponent_bullet_image = pygame.transform.scale(opponent_bullet_image, (40, 40))
     players_bullet_image = load_image('players_bullet.png')
-    players_bullet_image = pygame.transform.scale(players_bullet_image, (40, 40))
+    players_bullet_image = pygame.transform.scale(players_bullet_image, (25, 25))
     bullet_owners_class = None
 
     def __init__(self, group, owner, owners_x, owners_y):
