@@ -17,6 +17,7 @@ background = pygame.image.load('data/cosmos.png').convert()
 
 # Зададим заголовок окна
 pygame.display.set_caption("Space-shooter")
+current_lvl = None
 
 all_sprites = pygame.sprite.Group()
 all_meteorites = pygame.sprite.Group()
@@ -25,6 +26,7 @@ all_meteorites = pygame.sprite.Group()
 def main_menu():
     second_lvl = False
     third_lvl = False
+    global current_lvl
     with open('levels') as f:
         data = f.read()
         if data[0] == '1':
@@ -68,10 +70,12 @@ def main_menu():
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN and f_lvl_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
+                current_lvl = first_level
                 first_level()
             if (second_lvl and event.type == pygame.MOUSEBUTTONDOWN
                     and s_lvl_rect.colliderect(pygame.Rect(*event.pos, 10, 10))):
-                seconds_level()
+                current_lvl = second_level
+                second_level()
             if (third_lvl and event.type == pygame.MOUSEBUTTONDOWN
                     and th_lvl_rect.colliderect(pygame.Rect(*event.pos, 10, 10))):
                 pass
@@ -99,7 +103,7 @@ def death_screen():
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN and continue_btn_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
-                first_level()
+                current_lvl()
             if event.type == pygame.MOUSEBUTTONDOWN and main_menu_btn_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
                 main_menu()
         pygame.display.flip()
@@ -217,7 +221,7 @@ class Opponent(pygame.sprite.Sprite):
 opponent_interval = 9
 
 
-def seconds_level():
+def second_level():
     restart_game_s_level()
     spaceship = Spaceship(all_sprites)
     hp = HealthPoints(all_sprites)
@@ -282,7 +286,7 @@ def restart_game():
 
 
 class Meteorites(pygame.sprite.Sprite):
-    image = load_image("opponent.png", -1) # Указываем colorkey
+    image = load_image("meteor.png", -1) # Указываем colorkey
     image = pygame.transform.scale(image, (50, 50))
 
     def __init__(self, group):
