@@ -4,7 +4,7 @@ import os
 import random
 import time
 
-from pygame.examples.cursors import image
+
 
 # Инициализация Pygame
 pygame.init()
@@ -80,7 +80,8 @@ def main_menu():
                 second_level()
             if (third_lvl and event.type == pygame.MOUSEBUTTONDOWN
                     and th_lvl_rect.colliderect(pygame.Rect(*event.pos, 10, 10))):
-                pass
+                current_lvl = the_third_level
+                the_third_level()
         pygame.display.flip()
 
 
@@ -197,6 +198,52 @@ def first_level():
         pygame.display.flip()
         clock.tick(70)
 
+class Boss(pygame.sprite.Sprite):
+    def __init__(self, group):
+        super().__init__(group)
+        self.hp = 30  # Увеличенное количество здоровья для босса
+        self.max_hp = 30
+        self.image = load_image("boss.png", colorkey=(255, 255, 255))
+        self.image = pygame.transform.scale(self.image, (120, 100))  # Измените размер для лучшей видимости
+        self.rect = self.image.get_rect(center=(width - 35, height // 2))# Разместить босса в центре верхней части экрана
+        self.bullet_interval = 2  # Интервал выпуска патронов
+        self.current_time = time.time()  # Текущее время для отслеживания
+        self.last_bullet_time = time.time()  # Время последнего выпуска патронов
+        self.spawn_interval = 2  # Интервал для создания кораблей противника
+        self.last_spawn_time = time.time()  # Время последнего создания
+        self.create_opponent_ships()
+        self.speed = 2
+
+
+        if self.last_spawn_time >= self.spawn_interval:
+            self.create_opponent_ships()  # Создать корабли противника
+            self.last_spawn_time = self.current_time
+            self.direction = -1
+
+    def update(self):
+        # Двигаем спрайт вверх или вниз
+        self.rect.y += self.speed * self.direction
+
+        # Устанавливаем ограничение на движение
+        if self.rect.top <= 0:  # Если космический корабль достиг верхнего края экрана
+            self.direction = 1  # Изменяем направление вниз
+        elif self.rect.bottom >= height:  # Если космический корабль достиг нижнего края экрана
+            self.direction = -1
+
+
+        # Ограничиваем движение корабля экраном
+        self.rect.top = max(0, self.rect.top)  # Ограничиваем сверху
+        self.rect.bottom = min(height, self.rect.bottom)  # Ограничиваем снизу
+
+
+    def create_opponent_ships(self):
+        # Создание кораблей противника слева и справа от босса
+        for side in [-60, width + 60]:  # На каких координатах будут корабли
+            opponent = Opponent(all_sprites)
+            opponent.rect.center = (side, random.randint(0, height))  # Размещаем их случайно по высоте
+            all_opponents.add(opponent)
+
+
 
 class Opponent(pygame.sprite.Sprite):
     def __init__(self, group):
@@ -247,7 +294,7 @@ def second_level():
     opponent = Opponent(all_sprites)
     last_opponent_time = time.time()
     last_bullet_time = 0
-    bullet_interval = 0.65
+    bullet_interval = 0.50
 
     while running:
         for event in pygame.event.get():
@@ -294,6 +341,52 @@ def second_level():
         clock.tick(70)
 
 
+def the_third_level():
+    restart_game_t_level()
+    spaceship = Spaceship(all_sprites)
+    spaceships.add(spaceship)
+    boss = Boss(all_sprites)  # Босс
+    all_sprites.add(boss)
+    hp = HealthPoints(all_sprites, spaceship)
+    running = True
+    game_time = 60
+    pygame.time.set_timer(pygame.USEREVENT, 1000)
+    font = pygame.font.SysFont('arial', 40)
+    last_bullet_time = 0
+    bullet_interval = 0.50
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                sys.exit()
+            if event.type == pygame.USEREVENT:
+                game_time -= 1
+                if game_time == 0:
+                    victory_screen()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                main_menu()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                bullet_time = time.time()
+                if bullet_time - last_bullet_time >= bullet_interval:
+                    bullet = Bullets(all_sprites, spaceship, spaceship.rect.x, spaceship.rect.y + 25)
+                    last_bullet_time = bullet_time
+
+        # Отображаем фон
+        screen.blit(background, (0, 0))
+        text = font.render(str(game_time), True, pygame.Color('red'))
+        screen.blit(text, (width // 2 - text.get_width() // 2, text.get_height() // 2))
+        all_sprites.update()
+        all_sprites.draw(screen)
+
+        pygame.display.flip()
+        clock.tick(70)
+
+
+def restart_game_t_level():
+    spaceships.empty()
+
+
 def restart_game_s_level():
     all_sprites.empty()
     all_opponents.empty()
@@ -318,6 +411,8 @@ class Meteorites(pygame.sprite.Sprite):
         self.rect.x = 0
         self.rect.y = 0
         self.speed = 2
+        self.dead = True
+        self.boom_time = pygame.time.get_ticks()
         self.reset_pos()
 
     def reset_pos(self):
