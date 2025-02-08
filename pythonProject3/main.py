@@ -207,6 +207,9 @@ class Opponent(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.speed = 2
         self.reset_pos()
+        self.bullet_interval = 1.75
+        self.current_time = time.time()
+        self.last_bullet_time = time.time()
 
     def reset_pos(self):
         self.rect.y = random.randint(0, height - self.rect.height)
@@ -216,6 +219,10 @@ class Opponent(pygame.sprite.Sprite):
         self.rect.x -= self.speed
         if self.rect.right < 0:
             self.reset_pos()
+        self.current_time = time.time()
+        if self.current_time - self.last_bullet_time >= self.bullet_interval:
+            bullet = Bullets(all_sprites, self, self.rect.x, self.rect.y)
+            self.last_bullet_time = time.time()
 
 
 opponent_interval = 9
@@ -374,6 +381,38 @@ class HealthPoints(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = self.image.get_width() // 4
         self.rect.y = self.image.get_height() // 4
+
+
+class Bullets(pygame.sprite.Sprite):
+    opponent_bullet_image = load_image('opponents_bullet.png')
+    opponent_bullet_image = pygame.transform.scale(opponent_bullet_image, (40, 40))
+    players_bullet_image = load_image('players_bullet.png')
+    players_bullet_image = pygame.transform.scale(players_bullet_image, (40, 40))
+    bullet_owners_class = None
+
+    def __init__(self, group, owner, owners_x, owners_y):
+        super().__init__(group)
+        self.owner = owner
+        self.speed = 3
+        self.image = None
+        if isinstance(owner, Spaceship):
+            self.image = Bullets.players_bullet_image
+            self.bullet_owners_class = Spaceship
+        if isinstance(owner, Opponent):
+            self.image = Bullets.opponent_bullet_image
+            self.bullet_owners_class = Opponent
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = owners_x, owners_y
+
+
+    def update(self):
+        if self.bullet_owners_class == Spaceship:
+            self.rect.x += self.speed
+        if self.bullet_owners_class == Opponent:
+            self.rect.x -= self.speed
+
+        if self.rect.x > width or self.rect.x < 0:
+            self.kill()
 
 
 if __name__ == '__main__':
