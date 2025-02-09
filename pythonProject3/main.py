@@ -45,9 +45,19 @@ def main_menu():
     for i in range(1, len(authors_list) + 1):
         authors = font.render(authors_list[i - 1], 1, pygame.Color('white'))
         authors_rect = authors.get_rect()
-        authors_rect.x = 10
-        authors_rect.y = 25 * i
+        authors_rect.x = (width - width // 8)
+        authors_rect.y = (height // 2 + height // 6) + 25 * i
         screen.blit(authors, authors_rect)
+
+    instructions_list = ['Инструкция:', 'Управление кораблём - стрелочки',
+                         'Выход в главное меню - Escape', 'Стрельба - пробел']
+
+    for i in range(1, len(instructions_list) + 1):
+        instruction = font.render(instructions_list[i - 1], 1, pygame.Color('white'))
+        instruction_rect = instruction.get_rect()
+        instruction_rect.x = 10
+        instruction_rect.y =  (height // 2 + height // 6) + 25 * i
+        screen.blit(instruction, instruction_rect)
 
     games_title = font.render("Space-shooter", 1, pygame.Color('white'))
     title_rect = games_title.get_rect()
@@ -522,8 +532,11 @@ class Spaceship(pygame.sprite.Sprite):
         self.rect.top = max(0, self.rect.top)
         self.rect.bottom = min(height, self.rect.bottom)
 
-        if pygame.sprite.spritecollide(self, all_meteorites, True):
-            self.hp -= 50
+        if pygame.sprite.spritecollideany(self, all_meteorites):
+            meteor = pygame.sprite.spritecollideany(self, all_meteorites)
+            if pygame.sprite.collide_rect_ratio(0.7)(self, meteor):
+                self.hp -= 50
+                meteor.kill()
         if pygame.sprite.spritecollide(self, all_meteorites_2, True):
             self.hp -= 20
 
