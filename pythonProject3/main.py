@@ -203,8 +203,8 @@ all_meteorites_2 = pygame.sprite.Group()
 class Boss(pygame.sprite.Sprite):
     def __init__(self, group):
         super().__init__(group)
-        self.hp = 30  # Увеличенное количество здоровья для босса
-        self.max_hp = 30
+        self.hp = 20  # Увеличенное количество здоровья для босса
+        self.max_hp = 20
         self.image = load_image("boss.png", colorkey=(255, 255, 255))
         self.image = pygame.transform.scale(self.image, (120, 100))  # Измените размер для лучшей видимости
         self.rect = self.image.get_rect(center=(width - 35, height // 2))# Разместить босса в центре верхней части экрана
