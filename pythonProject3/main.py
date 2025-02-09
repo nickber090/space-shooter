@@ -5,7 +5,6 @@ import random
 import time
 
 
-
 # Инициализация Pygame
 pygame.init()
 
