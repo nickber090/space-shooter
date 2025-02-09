@@ -399,6 +399,7 @@ def the_third_level():
                 data[2] = '1'
             with open('levels', 'w') as f:
                 f.write(''.join(data))
+            time.sleep(0.5)
             titles()
 
         # Отображаем фон
