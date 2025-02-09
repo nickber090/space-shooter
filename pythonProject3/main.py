@@ -198,6 +198,7 @@ def first_level():
         pygame.display.flip()
         clock.tick(70)
 
+
 class Boss(pygame.sprite.Sprite):
     def __init__(self, group):
         super().__init__(group)
@@ -214,7 +215,6 @@ class Boss(pygame.sprite.Sprite):
         self.create_opponent_ships()
         self.speed = 2
 
-
         if self.last_spawn_time >= self.spawn_interval:
             self.create_opponent_ships()  # Создать корабли противника
             self.last_spawn_time = self.current_time
@@ -230,11 +230,9 @@ class Boss(pygame.sprite.Sprite):
         elif self.rect.bottom >= height:  # Если космический корабль достиг нижнего края экрана
             self.direction = -1
 
-
         # Ограничиваем движение корабля экраном
         self.rect.top = max(0, self.rect.top)  # Ограничиваем сверху
         self.rect.bottom = min(height, self.rect.bottom)  # Ограничиваем снизу
-
 
     def create_opponent_ships(self):
         # Создание кораблей противника слева и справа от босса
@@ -242,7 +240,6 @@ class Boss(pygame.sprite.Sprite):
             opponent = Opponent(all_sprites)
             opponent.rect.center = (side, random.randint(0, height))  # Размещаем их случайно по высоте
             all_opponents.add(opponent)
-
 
 
 class Opponent(pygame.sprite.Sprite):
@@ -385,6 +382,9 @@ def the_third_level():
 
 def restart_game_t_level():
     spaceships.empty()
+    all_opponents.empty()
+    all_meteorites.empty()
+    all_sprites.empty()
 
 
 def restart_game_s_level():
@@ -476,8 +476,11 @@ class Spaceship(pygame.sprite.Sprite):
         self.rect.top = max(0, self.rect.top)
         self.rect.bottom = min(height, self.rect.bottom)
 
-        if pygame.sprite.spritecollide(self, all_meteorites, True):
-            self.hp -= 50
+        if pygame.sprite.spritecollideany(self, all_meteorites):
+            meteor = pygame.sprite.spritecollideany(self, all_meteorites)
+            if pygame.sprite.collide_rect_ratio(0.7)(self, meteor):
+                self.hp -= 50
+                meteor.kill()
 
 
 class HealthPoints(pygame.sprite.Sprite):
