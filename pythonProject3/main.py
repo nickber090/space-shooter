@@ -41,14 +41,6 @@ def main_menu():
     font = pygame.font.Font(None, 35)
     screen.blit(fon, (0, 0))
 
-    authors_list = ['Авторы:', 'Мила', 'Коля', 'Родион']
-    for i in range(1, len(authors_list) + 1):
-        authors = font.render(authors_list[i - 1], 1, pygame.Color('white'))
-        authors_rect = authors.get_rect()
-        authors_rect.x = (width - width // 8)
-        authors_rect.y = (height // 2 + height // 6) + 25 * i
-        screen.blit(authors, authors_rect)
-
     instructions_list = ['Инструкция:', 'Управление кораблём - стрелочки',
                          'Выход в главное меню - Escape', 'Стрельба - пробел']
 
@@ -168,10 +160,12 @@ def load_image(name, colorkey=None):
 
 
 def first_level():
-    restart_game_f_level()
+    restart_game()
     spaceship = Spaceship(all_sprites)
     hp = HealthPoints(all_sprites, spaceship)
     running = True
+    meteor = Meteorites(all_sprites)
+    all_meteorites.add(meteor)
     last_meteor_time = time.time()
     game_time = 50
     pygame.time.set_timer(pygame.USEREVENT, 1000)
@@ -314,7 +308,7 @@ opponent_interval = 9
 
 
 def second_level():
-    restart_game_s_level()
+    restart_game()
     spaceship = Spaceship(all_sprites)
     spaceships.add(spaceship)
     hp = HealthPoints(all_sprites, spaceship)
@@ -373,7 +367,7 @@ def second_level():
 
 
 def the_third_level():
-    restart_game_t_level()
+    restart_game()
     spaceship = Spaceship(all_sprites)
     spaceships.add(spaceship)
     boss = Boss(all_sprites)  # Босс
@@ -405,7 +399,7 @@ def the_third_level():
                 data[2] = '1'
             with open('levels', 'w') as f:
                 f.write(''.join(data))
-            victory_screen()
+            titles()
 
         # Отображаем фон
         screen.blit(background, (0, 0))
@@ -418,24 +412,12 @@ def the_third_level():
         clock.tick(70)
 
 
-def restart_game_t_level():
-    spaceships.empty()
-    all_opponents.empty()
-    all_meteorites.empty()
-    all_sprites.empty()
-
-
-def restart_game_s_level():
+def restart_game():
     all_sprites.empty()
     all_opponents.empty()
     spaceships.empty()
-
-
-def restart_game_f_level():
-    all_sprites.empty()
     all_meteorites.empty()
-    meteor = Meteorites(all_sprites)
-    all_meteorites.add(meteor)
+    all_meteorites_2.empty()
 
 
 class Meteorites_2(pygame.sprite.Sprite):
@@ -626,6 +608,47 @@ class Bullets(pygame.sprite.Sprite):
 
         if self.rect.x > width or self.rect.x < 0:
             self.kill()
+
+
+def titles():
+    screen.fill((0, 0, 0))
+    pygame.time.set_timer(pygame.USEREVENT, 950)
+    titles_text = ['Поздравляем!', 'Вы прошли игру.', 'Надеемся, что вам понравилось.',
+            'Для выхода в главное меню нажмите escape.']
+    font = pygame.font.SysFont('arial', 30)
+    index = 0
+    authors_index = 0
+    running = True
+    authors_flag = False
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                main_menu()
+            if event.type == pygame.USEREVENT:
+                text = font.render(titles_text[index], 1, pygame.Color('white'))
+                text_rect = text.get_rect()
+                text_rect.x = width // 2 - text.get_width() // 2
+                text_rect.y = text.get_height() // 2 + 50 * index
+                index += 1
+                if index == len(titles_text):
+                    authors_flag = True
+                if authors_flag:
+                    authors_list = ['Авторы:', 'Мила', 'Коля', 'Родион']
+                    authors = font.render(authors_list[authors_index], 1, pygame.Color('white'))
+                    authors_rect = authors.get_rect()
+                    authors_rect.x = (width // 2 - authors.get_width() // 2)
+                    authors_rect.y = (height // 2) + 35 * authors_index
+                    authors_index += 1
+                    authors_index = authors_index % len(authors_list)
+                    screen.blit(authors, authors_rect)
+                index = index % len(titles_text)
+                screen.blit(text, text_rect)
+
+        pygame.display.flip()
 
 
 if __name__ == '__main__':
