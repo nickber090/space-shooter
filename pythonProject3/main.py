@@ -234,6 +234,9 @@ class Boss(pygame.sprite.Sprite):
         self.rect.top = max(0, self.rect.top)  # Ограничиваем сверху
         self.rect.bottom = min(height, self.rect.bottom)  # Ограничиваем снизу
 
+        if self.hp <= 0:
+            self.kill()
+
     def create_opponent_ships(self):
         # Создание кораблей противника слева и справа от босса
         for side in [-60, width + 60]:  # На каких координатах будут корабли
@@ -344,6 +347,7 @@ def the_third_level():
     spaceships.add(spaceship)
     boss = Boss(all_sprites)  # Босс
     all_sprites.add(boss)
+    all_opponents.add(boss)
     hp = HealthPoints(all_sprites, spaceship)
     running = True
     game_time = 60
@@ -553,6 +557,7 @@ class Bullets(pygame.sprite.Sprite):
                 if pygame.sprite.collide_rect_ratio(0.62)(self, enemy):
                     enemy.hp -= 1
                     self.kill()
+
 
         if self.bullet_owners_class == Opponent:
             self.rect.x -= self.speed
