@@ -287,7 +287,7 @@ class Opponent(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.speed = 2
         self.reset_pos()
-        self.bullet_interval = 1.5
+        self.bullet_interval = 1.25
         self.current_time = time.time()
         self.last_bullet_time = time.time()
         all_opponents.add(self)
