@@ -63,6 +63,12 @@ def main_menu():
     f_lvl_rect.top = height // 2 - f_lvl.get_height() // 2
     screen.blit(f_lvl, f_lvl_rect)
 
+    exit_button = font.render('Выход', 1, pygame.Color('white'))
+    exit_btn_rect = exit_button.get_rect()
+    exit_btn_rect.x = width - width // 8
+    exit_btn_rect.top = height // 100 * 85
+    screen.blit(exit_button, exit_btn_rect)
+
     if second_lvl:
         s_lvl = font.render('Уровень 2', 1, pygame.Color('white'))
         s_lvl_rect = s_lvl.get_rect()
@@ -85,6 +91,9 @@ def main_menu():
             if event.type == pygame.MOUSEBUTTONDOWN and f_lvl_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
                 current_lvl = first_level
                 first_level()
+            if event.type == pygame.MOUSEBUTTONDOWN and exit_btn_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
+                pygame.quit()
+                sys.exit()
             if (second_lvl and event.type == pygame.MOUSEBUTTONDOWN
                     and s_lvl_rect.colliderect(pygame.Rect(*event.pos, 10, 10))):
                 current_lvl = second_level
