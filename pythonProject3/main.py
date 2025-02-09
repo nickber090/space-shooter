@@ -198,6 +198,8 @@ def first_level():
         pygame.display.flip()
         clock.tick(70)
 
+all_meteorites_2 = pygame.sprite.Group()
+
 class Boss(pygame.sprite.Sprite):
     def __init__(self, group):
         super().__init__(group)
@@ -206,7 +208,7 @@ class Boss(pygame.sprite.Sprite):
         self.image = load_image("boss.png", colorkey=(255, 255, 255))
         self.image = pygame.transform.scale(self.image, (120, 100))  # Измените размер для лучшей видимости
         self.rect = self.image.get_rect(center=(width - 35, height // 2))# Разместить босса в центре верхней части экрана
-        self.bullet_interval = 2  # Интервал выпуска патронов
+        self.bullet_interval = 5  # Интервал выпуска патронов
         self.current_time = time.time()  # Текущее время для отслеживания
         self.last_bullet_time = time.time()  # Время последнего выпуска патронов
         self.spawn_interval = 2  # Интервал для создания кораблей противника
@@ -234,7 +236,13 @@ class Boss(pygame.sprite.Sprite):
         # Ограничиваем движение корабля экраном
         self.rect.top = max(0, self.rect.top)  # Ограничиваем сверху
         self.rect.bottom = min(height, self.rect.bottom)  # Ограничиваем снизу
+        current_time = time.time()
+        if current_time - self.last_bullet_time >= self.bullet_interval:
+            self.shoot_meteorite()  # Вызываем метод стрельбы метеоритом
+            self.last_bullet_time = current_time
 
+        if self.hp <= 0:
+            self.kill()
 
     def create_opponent_ships(self):
         # Создание кораблей противника слева и справа от босса
@@ -242,6 +250,13 @@ class Boss(pygame.sprite.Sprite):
             opponent = Opponent(all_sprites)
             opponent.rect.center = (side, random.randint(0, height))  # Размещаем их случайно по высоте
             all_opponents.add(opponent)
+
+    def shoot_meteorite(self):
+        # Создаем новый метеорит и помещаем его в группу спрайтов
+        meteorite = Meteorites_2(all_sprites)
+        meteorite.rect.center = (self.rect.centerx - 15, self.rect.centery)  # Позиция метеорита
+        all_meteorites_2.add(meteorite)
+
 
 
 
@@ -347,6 +362,7 @@ def the_third_level():
     spaceships.add(spaceship)
     boss = Boss(all_sprites)  # Босс
     all_sprites.add(boss)
+    all_opponents.add(boss)
     hp = HealthPoints(all_sprites, spaceship)
     running = True
     game_time = 60
@@ -385,6 +401,9 @@ def the_third_level():
 
 def restart_game_t_level():
     spaceships.empty()
+    all_opponents.empty()
+    all_meteorites.empty()
+    all_sprites.empty()
 
 
 def restart_game_s_level():
@@ -398,6 +417,23 @@ def restart_game_f_level():
     all_meteorites.empty()
     meteor = Meteorites(all_sprites)
     all_meteorites.add(meteor)
+
+class Meteorites_2(pygame.sprite.Sprite):
+    image = load_image("meteor.png", -1) # Указываем colorkey
+    image = pygame.transform.scale(image, (40, 40))
+
+    def __init__(self, group):
+        super().__init__(group)
+        self.image = Meteorites_2.image
+        self.rect = self.image.get_rect()
+        self.rect.x = 0
+        self.rect.y = 0
+        self.speed = 2
+        self.dead = True
+        self.boom_time = pygame.time.get_ticks()
+
+    def update(self):
+        self.rect.x -= self.speed  # Движение справа на лево
 
 
 class Meteorites(pygame.sprite.Sprite):
@@ -478,6 +514,8 @@ class Spaceship(pygame.sprite.Sprite):
 
         if pygame.sprite.spritecollide(self, all_meteorites, True):
             self.hp -= 50
+        if pygame.sprite.spritecollide(self, all_meteorites_2, True):
+            self.hp -= 20
 
 
 class HealthPoints(pygame.sprite.Sprite):
