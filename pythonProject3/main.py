@@ -5,7 +5,6 @@ import random
 import time
 
 
-
 # Инициализация Pygame
 pygame.init()
 
@@ -23,6 +22,7 @@ all_sprites = pygame.sprite.Group()
 all_meteorites = pygame.sprite.Group()
 all_opponents = pygame.sprite.Group()
 spaceships = pygame.sprite.Group()
+all_meteorites_2 = pygame.sprite.Group()
 
 
 def main_menu():
@@ -40,6 +40,16 @@ def main_menu():
     font = pygame.font.Font(None, 35)
     screen.blit(fon, (0, 0))
 
+    instructions_list = ['Инструкция:', 'Управление кораблём - стрелочки',
+                         'Выход в главное меню - Escape', 'Стрельба - пробел']
+
+    for i in range(1, len(instructions_list) + 1):
+        instruction = font.render(instructions_list[i - 1], 1, pygame.Color('white'))
+        instruction_rect = instruction.get_rect()
+        instruction_rect.x = 10
+        instruction_rect.y =  (height // 2 + height // 6) + 25 * i
+        screen.blit(instruction, instruction_rect)
+
     games_title = font.render("Space-shooter", 1, pygame.Color('white'))
     title_rect = games_title.get_rect()
     title_rect.x = width // 2 - title_rect.width // 2
@@ -51,6 +61,12 @@ def main_menu():
     f_lvl_rect.x = width // 3 - f_lvl.get_width()
     f_lvl_rect.top = height // 2 - f_lvl.get_height() // 2
     screen.blit(f_lvl, f_lvl_rect)
+
+    exit_button = font.render('Выход', 1, pygame.Color('white'))
+    exit_btn_rect = exit_button.get_rect()
+    exit_btn_rect.x = width - width // 8
+    exit_btn_rect.top = height // 100 * 85
+    screen.blit(exit_button, exit_btn_rect)
 
     if second_lvl:
         s_lvl = font.render('Уровень 2', 1, pygame.Color('white'))
@@ -74,6 +90,9 @@ def main_menu():
             if event.type == pygame.MOUSEBUTTONDOWN and f_lvl_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
                 current_lvl = first_level
                 first_level()
+            if event.type == pygame.MOUSEBUTTONDOWN and exit_btn_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
+                pygame.quit()
+                sys.exit()
             if (second_lvl and event.type == pygame.MOUSEBUTTONDOWN
                     and s_lvl_rect.colliderect(pygame.Rect(*event.pos, 10, 10))):
                 current_lvl = second_level
@@ -149,10 +168,12 @@ def load_image(name, colorkey=None):
 
 
 def first_level():
-    restart_game_f_level()
+    restart_game()
     spaceship = Spaceship(all_sprites)
     hp = HealthPoints(all_sprites, spaceship)
     running = True
+    meteor = Meteorites(all_sprites)
+    all_meteorites.add(meteor)
     last_meteor_time = time.time()
     game_time = 50
     pygame.time.set_timer(pygame.USEREVENT, 1000)
@@ -198,7 +219,6 @@ def first_level():
         pygame.display.flip()
         clock.tick(70)
 
-all_meteorites_2 = pygame.sprite.Group()
 
 class Boss(pygame.sprite.Sprite):
     def __init__(self, group):
@@ -258,8 +278,6 @@ class Boss(pygame.sprite.Sprite):
         all_meteorites_2.add(meteorite)
 
 
-
-
 class Opponent(pygame.sprite.Sprite):
     def __init__(self, group):
         super().__init__(group)
@@ -271,7 +289,7 @@ class Opponent(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.speed = 2
         self.reset_pos()
-        self.bullet_interval = 1.5
+        self.bullet_interval = 1.25
         self.current_time = time.time()
         self.last_bullet_time = time.time()
         all_opponents.add(self)
@@ -298,7 +316,7 @@ opponent_interval = 9
 
 
 def second_level():
-    restart_game_s_level()
+    restart_game()
     spaceship = Spaceship(all_sprites)
     spaceships.add(spaceship)
     hp = HealthPoints(all_sprites, spaceship)
@@ -357,17 +375,16 @@ def second_level():
 
 
 def the_third_level():
-    restart_game_t_level()
+    restart_game()
     spaceship = Spaceship(all_sprites)
     spaceships.add(spaceship)
     boss = Boss(all_sprites)  # Босс
     all_sprites.add(boss)
     all_opponents.add(boss)
     hp = HealthPoints(all_sprites, spaceship)
+    boss_hp = HealthPoints(all_sprites, boss)
     running = True
-    game_time = 60
-    pygame.time.set_timer(pygame.USEREVENT, 1000)
-    font = pygame.font.SysFont('arial', 40)
+    font = pygame.font.SysFont('arial', 30)
     last_bullet_time = 0
     bullet_interval = 0.50
 
@@ -376,10 +393,6 @@ def the_third_level():
             if event.type == pygame.QUIT:
                 running = False
                 sys.exit()
-            if event.type == pygame.USEREVENT:
-                game_time -= 1
-                if game_time == 0:
-                    victory_screen()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 main_menu()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
@@ -388,9 +401,18 @@ def the_third_level():
                     bullet = Bullets(all_sprites, spaceship, spaceship.rect.x, spaceship.rect.y + 25)
                     last_bullet_time = bullet_time
 
+        if boss.hp <= 0:
+            with open('levels') as f:
+                data = list(f.read())
+                data[2] = '1'
+            with open('levels', 'w') as f:
+                f.write(''.join(data))
+            time.sleep(0.5)
+            titles()
+
         # Отображаем фон
         screen.blit(background, (0, 0))
-        text = font.render(str(game_time), True, pygame.Color('red'))
+        text = font.render('Победи босса!', True, pygame.Color('red'))
         screen.blit(text, (width // 2 - text.get_width() // 2, text.get_height() // 2))
         all_sprites.update()
         all_sprites.draw(screen)
@@ -399,24 +421,13 @@ def the_third_level():
         clock.tick(70)
 
 
-def restart_game_t_level():
-    spaceships.empty()
-    all_opponents.empty()
-    all_meteorites.empty()
-    all_sprites.empty()
-
-
-def restart_game_s_level():
+def restart_game():
     all_sprites.empty()
     all_opponents.empty()
     spaceships.empty()
-
-
-def restart_game_f_level():
-    all_sprites.empty()
     all_meteorites.empty()
-    meteor = Meteorites(all_sprites)
-    all_meteorites.add(meteor)
+    all_meteorites_2.empty()
+
 
 class Meteorites_2(pygame.sprite.Sprite):
     image = load_image("meteor.png", -1) # Указываем colorkey
@@ -512,8 +523,11 @@ class Spaceship(pygame.sprite.Sprite):
         self.rect.top = max(0, self.rect.top)
         self.rect.bottom = min(height, self.rect.bottom)
 
-        if pygame.sprite.spritecollide(self, all_meteorites, True):
-            self.hp -= 50
+        if pygame.sprite.spritecollideany(self, all_meteorites):
+            meteor = pygame.sprite.spritecollideany(self, all_meteorites)
+            if pygame.sprite.collide_rect_ratio(0.7)(self, meteor):
+                self.hp -= 50
+                meteor.kill()
         if pygame.sprite.spritecollide(self, all_meteorites_2, True):
             self.hp -= 20
 
@@ -543,6 +557,10 @@ class HealthPoints(pygame.sprite.Sprite):
             self.font = pygame.font.SysFont('arial', 20)
             self.rect.x = owner.rect.x
             self.rect.y = owner.rect.y - 10
+        if isinstance(owner, Boss):
+            self.font = pygame.font.SysFont('arial', 30)
+            self.hp_x, self.hp_y = width - width // 20, height // 20
+            self.rect.x, self.rect.y = self.hp_x - 75, self.hp_y - 10
 
     def update(self):
         if isinstance(self.owner, Opponent):
@@ -599,6 +617,47 @@ class Bullets(pygame.sprite.Sprite):
 
         if self.rect.x > width or self.rect.x < 0:
             self.kill()
+
+
+def titles():
+    screen.fill((0, 0, 0))
+    pygame.time.set_timer(pygame.USEREVENT, 950)
+    titles_text = ['Поздравляем!', 'Вы прошли игру.', 'Надеемся, что вам понравилось.',
+            'Для выхода в главное меню нажмите escape.']
+    font = pygame.font.SysFont('arial', 30)
+    index = 0
+    authors_index = 0
+    running = True
+    authors_flag = False
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                main_menu()
+            if event.type == pygame.USEREVENT:
+                text = font.render(titles_text[index], 1, pygame.Color('white'))
+                text_rect = text.get_rect()
+                text_rect.x = width // 2 - text.get_width() // 2
+                text_rect.y = text.get_height() // 2 + 50 * index
+                index += 1
+                if index == len(titles_text):
+                    authors_flag = True
+                if authors_flag:
+                    authors_list = ['Авторы:', 'Мила', 'Коля', 'Родион']
+                    authors = font.render(authors_list[authors_index], 1, pygame.Color('white'))
+                    authors_rect = authors.get_rect()
+                    authors_rect.x = (width // 2 - authors.get_width() // 2)
+                    authors_rect.y = (height // 2) + 35 * authors_index
+                    authors_index += 1
+                    authors_index = authors_index % len(authors_list)
+                    screen.blit(authors, authors_rect)
+                index = index % len(titles_text)
+                screen.blit(text, text_rect)
+
+        pygame.display.flip()
 
 
 if __name__ == '__main__':
