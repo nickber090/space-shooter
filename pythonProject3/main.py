@@ -577,6 +577,7 @@ class HealthPoints(pygame.sprite.Sprite):
 
 
 class Bullets(pygame.sprite.Sprite):
+    # загружаем картинки кораблей
     opponent_bullet_image = load_image('opponents_bullet.png')
     opponent_bullet_image = pygame.transform.scale(opponent_bullet_image, (40, 40))
     players_bullet_image = load_image('players_bullet.png')
@@ -589,9 +590,11 @@ class Bullets(pygame.sprite.Sprite):
         self.speed = 4
         self.image = None
         if isinstance(owner, Spaceship):
+            # если владелец пули - корабль игрока, то устанавливается соответственная картинка
             self.image = Bullets.players_bullet_image
             self.bullet_owners_class = Spaceship
         if isinstance(owner, Opponent):
+            # если владелец пули - корабль противника, то устанавливается соответственная картинка
             self.image = Bullets.opponent_bullet_image
             self.bullet_owners_class = Opponent
         self.rect = self.image.get_rect()
@@ -599,6 +602,7 @@ class Bullets(pygame.sprite.Sprite):
 
 
     def update(self):
+        # если владелец пули - корабль игрока, то пули будут лететь в лево, а также при столкновении снимать 1хп врагам
         if self.bullet_owners_class == Spaceship:
             self.rect.x += self.speed
             if pygame.sprite.spritecollideany(self, all_opponents):
@@ -607,6 +611,7 @@ class Bullets(pygame.sprite.Sprite):
                     enemy.hp -= 1
                     self.kill()
 
+        # если владелец пули - корабль противника, то пули будут лететь вправо и снимать кораблю игрока 10 хп
         if self.bullet_owners_class == Opponent:
             self.rect.x -= self.speed
             if pygame.sprite.spritecollideany(self, spaceships):
@@ -615,6 +620,7 @@ class Bullets(pygame.sprite.Sprite):
                     ship.hp -= 10
                     self.kill()
 
+        # Проверка на то, что пуля вышла за пределы экрана. если да, то она пропадает
         if self.rect.x > width or self.rect.x < 0:
             self.kill()
 
