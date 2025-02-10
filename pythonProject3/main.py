@@ -26,6 +26,7 @@ all_meteorites_2 = pygame.sprite.Group()
 
 
 def main_menu():
+    # Проверка на то, прошел ли игрок 1 и 2 уровень
     second_lvl = False
     third_lvl = False
     global current_lvl
@@ -43,6 +44,7 @@ def main_menu():
     instructions_list = ['Инструкция:', 'Управление кораблём - стрелочки',
                          'Выход в главное меню - Escape', 'Стрельба - пробел']
 
+    # Вывод инструкции в главном меню
     for i in range(1, len(instructions_list) + 1):
         instruction = font.render(instructions_list[i - 1], 1, pygame.Color('white'))
         instruction_rect = instruction.get_rect()
@@ -50,24 +52,28 @@ def main_menu():
         instruction_rect.y =  (height // 2 + height // 6) + 25 * i
         screen.blit(instruction, instruction_rect)
 
+    # Название игры
     games_title = font.render("Space-shooter", 1, pygame.Color('white'))
     title_rect = games_title.get_rect()
     title_rect.x = width // 2 - title_rect.width // 2
     title_rect.top = 20
     screen.blit(games_title, title_rect)
 
+    # Кнопка перехода на 1 уровень
     f_lvl = font.render('Уровень 1', 1, pygame.Color('white'))
     f_lvl_rect = f_lvl.get_rect()
     f_lvl_rect.x = width // 3 - f_lvl.get_width()
     f_lvl_rect.top = height // 2 - f_lvl.get_height() // 2
     screen.blit(f_lvl, f_lvl_rect)
 
+    # Кнопка выхода из игры
     exit_button = font.render('Выход', 1, pygame.Color('white'))
     exit_btn_rect = exit_button.get_rect()
     exit_btn_rect.x = width - width // 8
     exit_btn_rect.top = height // 100 * 85
     screen.blit(exit_button, exit_btn_rect)
 
+    # Если игрок прошел 1 ур, то открывается 2-ой
     if second_lvl:
         s_lvl = font.render('Уровень 2', 1, pygame.Color('white'))
         s_lvl_rect = s_lvl.get_rect()
@@ -75,6 +81,7 @@ def main_menu():
         s_lvl_rect.top = height // 2 - s_lvl.get_height() // 2
         screen.blit(s_lvl, s_lvl_rect)
 
+    # Если игрок прошёл 2 ур, то открывается 3-ий
     if third_lvl:
         th_lvl = font.render('Уровень 3', 1, pygame.Color('white'))
         th_lvl_rect = th_lvl.get_rect()
@@ -87,6 +94,7 @@ def main_menu():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            # Проверки на то, нажал ли игрок кнопку
             if event.type == pygame.MOUSEBUTTONDOWN and f_lvl_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
                 current_lvl = first_level
                 first_level()
@@ -105,6 +113,7 @@ def main_menu():
 
 
 def death_screen():
+    # Создание кнопок Продолжить и Главное меню
     fon = pygame.transform.scale(pygame.image.load('data/death_screen.PNG'), size)
     font = pygame.font.Font(None, 35)
     screen.blit(fon, (0, 0))
@@ -124,6 +133,7 @@ def death_screen():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            # Проверка на то, нажал ли игрок кнопку
             if event.type == pygame.MOUSEBUTTONDOWN and continue_btn_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
                 current_lvl()
             if event.type == pygame.MOUSEBUTTONDOWN and main_menu_btn_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
@@ -132,6 +142,7 @@ def death_screen():
 
 
 def victory_screen():
+    # Создание кнопки Главное меню
     fon = pygame.transform.scale(pygame.image.load('data/victory_screen.PNG'), size)
     font = pygame.font.Font(None, 35)
     screen.blit(fon, (0, 0))
@@ -146,6 +157,7 @@ def victory_screen():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            # Если кнопку нажали, то запускаем главное меню
             if event.type == pygame.MOUSEBUTTONDOWN and main_menu_btn_rect.colliderect(pygame.Rect(*event.pos, 10, 10)):
                 main_menu()
         pygame.display.flip()
@@ -422,6 +434,7 @@ def the_third_level():
 
 
 def restart_game():
+    # При запуске уровню очищаем все группы спрайтов
     all_sprites.empty()
     all_opponents.empty()
     spaceships.empty()
@@ -533,6 +546,7 @@ class Spaceship(pygame.sprite.Sprite):
 
 
 class HealthPoints(pygame.sprite.Sprite):
+    # Загрузка картинок
     full_hp_image = load_image('full_hp.png', -1)
     full_hp_image = pygame.transform.scale(full_hp_image, (50, 50))
     half_hp_image = load_image('half_hp.png')
@@ -548,12 +562,14 @@ class HealthPoints(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.owner = owner
         if isinstance(owner, Spaceship):
+            # Если владелец - корабль игрока, то сердечко спавнится в левом верхнем углу
             self.font = pygame.font.SysFont('arial', 30)
             self.rect.x = self.image.get_width() // 4
             self.rect.y = self.image.get_height() // 4
             self.hp_x = self.rect.x + 60
             self.hp_y = self.rect.y + 15
         if isinstance(owner, Opponent):
+            # Если владелец - корабль врага, то хп спавнится над ним
             self.font = pygame.font.SysFont('arial', 20)
             self.rect.x = owner.rect.x
             self.rect.y = owner.rect.y - 10
@@ -564,10 +580,12 @@ class HealthPoints(pygame.sprite.Sprite):
 
     def update(self):
         if isinstance(self.owner, Opponent):
+            # Если корабль врага, то координаты меняются на его, чтоб хп всегда было над противником
             self.hp_x, self.hp_y = self.owner.rect.x, self.owner.rect.y
         hp = self.font.render(f'{self.owner.hp}', True, pygame.Color('red'))
         screen.blit(hp, (self.hp_x, self.hp_y))
 
+        # Смена картинок в зависимости от кол-ва хп владельца
         if self.owner.hp <= self.owner.max_hp // 2:
             self.image = HealthPoints.half_hp_image
         if self.owner.hp <= self.owner.max_hp // 3:
@@ -644,6 +662,7 @@ def titles():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 main_menu()
             if event.type == pygame.USEREVENT:
+                # Если сработал таймер и прошло 950 млс, то выводится текст титров(по одной строчке)
                 text = font.render(titles_text[index], 1, pygame.Color('white'))
                 text_rect = text.get_rect()
                 text_rect.x = width // 2 - text.get_width() // 2
@@ -651,6 +670,7 @@ def titles():
                 index += 1
                 if index == len(titles_text):
                     authors_flag = True
+                # Если вывелись благодарности, то затем выводятся и авторы
                 if authors_flag:
                     authors_list = ['Авторы:', 'Мила', 'Коля', 'Родион']
                     authors = font.render(authors_list[authors_index], 1, pygame.Color('white'))
