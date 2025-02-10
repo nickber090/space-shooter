@@ -18,6 +18,8 @@ background = pygame.image.load('data/cosmos.png').convert()
 pygame.display.set_caption("Space-shooter")
 current_lvl = None
 
+
+#создание групп для спрайтов
 all_sprites = pygame.sprite.Group()
 all_meteorites = pygame.sprite.Group()
 all_opponents = pygame.sprite.Group()
@@ -164,6 +166,7 @@ def victory_screen():
 
 
 def load_image(name, colorkey=None):
+    #функция для удобства загрузки фотографий
     fullname = os.path.join('data', name)
     try:
         image = pygame.image.load(fullname)
@@ -443,6 +446,7 @@ def restart_game():
 
 
 class Meteorites_2(pygame.sprite.Sprite):
+    #создаем второй тип метеорита для босса
     image = load_image("meteor.png", -1) # Указываем colorkey
     image = pygame.transform.scale(image, (40, 40))
 
@@ -672,7 +676,7 @@ def titles():
                     authors_flag = True
                 # Если вывелись благодарности, то затем выводятся и авторы
                 if authors_flag:
-                    authors_list = ['Авторы:', 'Мила', 'Коля', 'Родион']
+                    authors_list = ['Авторы:', 'Мила', 'Коля', 'Радик']
                     authors = font.render(authors_list[authors_index], 1, pygame.Color('white'))
                     authors_rect = authors.get_rect()
                     authors_rect.x = (width // 2 - authors.get_width() // 2)
